@@ -30,6 +30,47 @@ public class JpegImageAnalysis {
     private boolean isDistorted = false;
     private boolean isFileComplete = false;
 
+    public static void main(String[] args) {
+        if (args.length != 0 && !args[0].isEmpty()) {
+            long start = System.currentTimeMillis();
+            System.out.println("Scanning " + args[0] + "....");
+
+            File directory = new File(args[0]);
+
+            if (directory.exists()) {
+                File[] shuppins = directory.listFiles();
+                for (File shuppin : shuppins) {
+                    // If only a directory
+                    if (shuppin.isDirectory()) {
+                        try {
+                            File[] images = shuppin.listFiles((dir, name) ->
+                                    name.equalsIgnoreCase("front.jpg") ||
+                                            name.equalsIgnoreCase("back.jpg") ||
+                                            name.equalsIgnoreCase("interior.jpg") ||
+                                            name.equalsIgnoreCase("sheet_plain.jpg")
+                            );
+                            for (File image : images) {
+                                JpegImageAnalysis jpg = new JpegImageAnalysis(image.getAbsolutePath());
+                                if (jpg.isDistorted) {
+                                    System.out.println("Distorted: " + shuppin.getName());
+                                    break;
+                                }
+                            }
+                        } catch (IOException | NullPointerException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+            long end = System.currentTimeMillis();
+            System.out.println("Time(secs): " + ((double)(end - start)/1000));
+        } else {
+            System.out.println("Usage: java JpegImageAnalysis /directory/");
+            System.out.println("Example: ");
+            System.out.println("\t\tjava JpegImageAnalysis /usr/local/iDirectStorage/Cache/USS/Tokyo/20151203/");
+        }
+    }
 
     public JpegImageAnalysis(String fileName) throws IOException {
         this.fileName = fileName;
@@ -39,6 +80,7 @@ public class JpegImageAnalysis {
         setIsJpg();
         setIsFileComplete(JPG_END_A);
         setIsFileComplete(JPG_END_B);
+        setIsDistorted();
     }
 
     private void setIsJpg() throws IOException {
@@ -73,14 +115,15 @@ public class JpegImageAnalysis {
 
     private void setIsDistorted() throws IOException {
         if (new File(this.fileName).exists()) {
-            byte[] buffer = new byte[threshold];
             try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
                 int ctr = 0;
                 int temp = 0;
                 int length = (int) (file.length() > range ? (file.length() - range) : 0);
                 for (int i = (int) file.length() - 1; i > length; i--) {
+
                     file.seek(i);
                     int temp2 = file.read();
+
                     if (temp == temp2) {
                         ctr++;
                     }
@@ -90,7 +133,6 @@ public class JpegImageAnalysis {
                 if (ctr > threshold) {
                     isDistorted = true;
                 }
-
             }
         }
     }
