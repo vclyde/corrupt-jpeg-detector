@@ -34,7 +34,7 @@ public class JpegImageAnalysis {
         if (args.length != 0 && !args[0].isEmpty()) {
             long start = System.currentTimeMillis();
             System.out.println("Scanning " + args[0] + "....");
-
+            int ctr = 0;
             File directory = new File(args[0]);
 
             if (directory.exists()) {
@@ -44,15 +44,17 @@ public class JpegImageAnalysis {
                     if (shuppin.isDirectory()) {
                         try {
                             File[] images = shuppin.listFiles((dir, name) ->
-                                    name.equalsIgnoreCase("front.jpg") ||
-                                            name.equalsIgnoreCase("back.jpg") ||
-                                            name.equalsIgnoreCase("interior.jpg") ||
-                                            name.equalsIgnoreCase("sheet_plain.jpg")
+                                    name.equals("front.jpg") ||
+                                            name.equals("back.jpg") ||
+                                            name.equals("interior.jpg") ||
+                                            name.equals("sheet_plain.jpg") ||
+                                            name.equals("sheet.jpg")
                             );
                             for (File image : images) {
                                 JpegImageAnalysis jpg = new JpegImageAnalysis(image.getAbsolutePath());
                                 if (jpg.isDistorted) {
                                     System.out.println("Distorted: " + shuppin.getName());
+                                    ctr++;
                                     break;
                                 }
                             }
@@ -65,6 +67,7 @@ public class JpegImageAnalysis {
             }
             long end = System.currentTimeMillis();
             System.out.println("Time(secs): " + ((double)(end - start)/1000));
+            System.out.println("Number of units with distorted images: " + ctr);
         } else {
             System.out.println("Usage: java JpegImageAnalysis /directory/");
             System.out.println("Example: ");
