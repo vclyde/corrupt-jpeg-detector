@@ -7,14 +7,13 @@ import java.io.RandomAccessFile;
 /**
  * Class for analysing jpeg images
  *
- *
  * @author Clyde M. Velasquez
  * @version 0.1
  * @since December 03, 2015
  */
 public class JpegImageAnalysis {
-    public static int threshold = 50;
-    public static int range = 100;
+    public static int threshold = 25;
+    public static int range = 50;
 
     // Jpg signature
     // 255 216 255
@@ -84,6 +83,7 @@ public class JpegImageAnalysis {
         setIsFileComplete(JPG_END_A);
         setIsFileComplete(JPG_END_B);
         setIsDistorted();
+        setIsDistorted2();
     }
 
     private void setIsJpg() throws IOException {
@@ -136,6 +136,28 @@ public class JpegImageAnalysis {
                 if (ctr > threshold) {
                     isDistorted = true;
                 }
+            }
+        }
+    }
+
+    private void setIsDistorted2() throws IOException {
+        if (new File(this.fileName).exists()) {
+            int ctr = 0;
+            int temp1;
+            int temp2;
+            try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
+                for (int i = (int) file.length() - 3; i > file.length() - 1 - 2 - (5*16); i-=2) {
+                    file.seek(i);
+                    temp1 = file.read();
+                    file.seek(i-1);
+                    temp2 = file.read();
+                    if (temp1 == temp2) {
+                        ctr++;
+                    }
+                }
+                System.out.println(ctr);
+                if (ctr >= 24)
+                    this.isDistorted = true;
             }
         }
     }
