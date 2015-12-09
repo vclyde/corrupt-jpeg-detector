@@ -1,4 +1,4 @@
-package com.clyde.image;
+// package com.clyde.image;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +59,7 @@ public class JpegImageAnalysis {
                                 }
                             }
                         } catch (IOException | NullPointerException e) {
+                            System.err.println(shuppin.getAbsolutePath());
                             e.printStackTrace();
                         }
                     }
@@ -78,13 +79,13 @@ public class JpegImageAnalysis {
 
     public JpegImageAnalysis(String fileName) throws IOException {
         this.fileName = fileName;
-        if (needsTrim())
-            trimFile();
+        // if (needsTrim())
+        //    trimFile();
 
         setIsJpg();
         setIsFileComplete(JPG_END_A);
         setIsFileComplete(JPG_END_B);
-        setIsDistorted();
+        // setIsDistorted();
         setIsDistorted2();
     }
 
@@ -146,7 +147,7 @@ public class JpegImageAnalysis {
             int ctr = 0;
             int temp1;
             int temp2;
-			int line = 5; 
+			int line = 3;
 			int numBytes = 16;
             try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
 				int start = (int) file.length() - 1 - endBytesLength;
@@ -160,7 +161,8 @@ public class JpegImageAnalysis {
                         ctr++;
                     }
                 }
-                // Threshold is 24
+                file.close();
+
                 if (ctr >= 16)
                     this.isDistorted = true;
             }
