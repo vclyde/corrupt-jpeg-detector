@@ -1,4 +1,4 @@
-// package com.clyde.image;
+package com.clyde.image;
 
 import java.io.File;
 import java.io.IOException;
