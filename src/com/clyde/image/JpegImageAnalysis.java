@@ -28,6 +28,7 @@ public class JpegImageAnalysis {
     private boolean isJpg = false;
     private boolean isDistorted = false;
     private boolean isFileComplete = false;
+	private int endBytesLength;
 
     public static void main(String[] args) {
         if (args.length != 0 && !args[0].isEmpty()) {
@@ -44,10 +45,10 @@ public class JpegImageAnalysis {
                         try {
                             File[] images = shuppin.listFiles((dir, name) ->
                                     name.equals("front.jpg") ||
-                                            name.equals("back.jpg") ||
-                                            name.equals("interior.jpg") ||
-                                            name.equals("sheet_plain.jpg") ||
-                                            name.equals("sheet.jpg")
+									name.equals("back.jpg") ||
+									name.equals("interior.jpg") ||
+									name.equals("sheet_plain.jpg") ||
+									name.equals("sheet.jpg")
                             );
                             for (File image : images) {
                                 JpegImageAnalysis jpg = new JpegImageAnalysis(image.getAbsolutePath());
@@ -69,6 +70,7 @@ public class JpegImageAnalysis {
             System.out.println("Number of units with distorted images: " + ctr);
         } else {
             System.out.println("Usage: java JpegImageAnalysis /directory/");
+			System.out.println();
             System.out.println("Example: ");
             System.out.println("\t\tjava JpegImageAnalysis /usr/local/iDirectStorage/Cache/USS/Tokyo/20151203/");
         }
@@ -123,7 +125,6 @@ public class JpegImageAnalysis {
                 int temp = 0;
                 int length = (int) (file.length() > range ? (file.length() - range) : 0);
                 for (int i = (int) file.length() - 1; i > length; i--) {
-
                     file.seek(i);
                     int temp2 = file.read();
 
@@ -145,8 +146,12 @@ public class JpegImageAnalysis {
             int ctr = 0;
             int temp1;
             int temp2;
+			int line = 5; 
+			int numBytes = 16;
             try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
-                for (int i = (int) file.length() - 3; i > file.length() - 1 - 2 - (5*16); i-=2) {
+				int start = (int) file.length() - 1 - endBytesLength;
+				int length = start - (line * numBytes);
+                for (int i = start; i > length; i-=2) {
                     file.seek(i);
                     temp1 = file.read();
                     file.seek(i-1);
@@ -155,8 +160,8 @@ public class JpegImageAnalysis {
                         ctr++;
                     }
                 }
-                System.out.println(ctr);
-                if (ctr >= 24)
+                // Threshold is 24
+                if (ctr >= 16)
                     this.isDistorted = true;
             }
         }
@@ -177,6 +182,7 @@ public class JpegImageAnalysis {
                 return false;
         }
         isFileComplete = true;
+		endBytesLength = comp.length;
         return true;
     }
 
@@ -204,7 +210,7 @@ public class JpegImageAnalysis {
 
         byte[] bufferOut = new byte[index];
         System.arraycopy(bufferIn, 0, bufferOut, 0, index);
-        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "w")) {
+        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "rw")) {
             for(byte b : bufferOut) {
                 file.writeByte(b);
             }
