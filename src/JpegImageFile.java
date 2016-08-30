@@ -5,89 +5,32 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /**
- * Class for analysing jpeg images
+ * Class for detecting corrupt JPEG image
  *
  * @author Clyde M. Velasquez
- * @version 0.1
+ * @version 0.2
  * @since December 03, 2015
  */
-public class JpegImageAnalysis {
-    public static int threshold = 25;
-    public static int range = 50;
-
-    // Jpg signature
+public class JpegImageFile {
+	// Jpeg signature or markers
     // 255 216 255
-    private final byte[] JPG_SIGNATURE = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF };
-    // End bytes
+    public static final byte[] START_OF_IMAGE = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF };
     // 255 217
-    private final byte[] JPG_END_A = {(byte) 0xFF, (byte) 0xD9};
-    // 255 217
-    private final byte[] JPG_END_B = {(byte) 0xFF, (byte) 0xD9, (byte) 0xFF, (byte) 0xFF};
+    public static final byte[] END_OF_IMAGE = {(byte) 0xFF, (byte) 0xD9};
 
-    private String fileName = "";
-    private boolean isJpg = false;
-    private boolean isDistorted = false;
-    private boolean isFileComplete = false;
+    private File jpegFile;
+    private boolean isJpeg;
+    private boolean isCorrupt;
+    private boolean isFileComplete;
 	private int endBytesLength;
 
-    public static void main(String[] args) {
-        if (args.length != 0 && !args[0].isEmpty()) {
-            long start = System.currentTimeMillis();
-            System.out.println("Scanning " + args[0] + "....");
-            int ctr = 0;
-            File directory = new File(args[0]);
-
-            if (directory.exists()) {
-                File[] shuppins = directory.listFiles();
-                for (File shuppin : shuppins) {
-                    // If only a directory
-                    if (shuppin.isDirectory()) {
-                        try {
-                            File[] images = shuppin.listFiles((dir, name) ->
-                                    name.equals("front.jpg") ||
-									name.equals("back.jpg") ||
-									name.equals("interior.jpg") ||
-									name.equals("sheet_plain.jpg") ||
-									name.equals("sheet.jpg")
-                            );
-                            for (File image : images) {
-                                JpegImageAnalysis jpg = new JpegImageAnalysis(image.getAbsolutePath());
-                                if (jpg.isDistorted) {
-                                    System.out.println("Distorted: " + shuppin.getName());
-                                    ctr++;
-                                    break;
-                                }
-                            }
-                        } catch (IOException | NullPointerException e) {
-                            System.err.println(shuppin.getAbsolutePath());
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-            }
-            long end = System.currentTimeMillis();
-            System.out.println("Time(secs): " + ((double)(end - start)/1000));
-            System.out.println("Number of units with distorted images: " + ctr);
-        } else {
-            System.out.println("Usage: java JpegImageAnalysis /directory/");
-			System.out.println();
-            System.out.println("Example: ");
-            System.out.println("\t\tjava JpegImageAnalysis /usr/local/iDirectStorage/Cache/USS/Tokyo/20151203/");
-        }
-    }
-
-    public JpegImageAnalysis(String fileName) throws IOException {
-        this.fileName = fileName;
-        // if (needsTrim())
-        //    trimFile();
-
-        setIsJpg();
-        setIsFileComplete(JPG_END_A);
-        setIsFileComplete(JPG_END_B);
-        // setIsDistorted();
-        setIsDistorted2();
-    }
+	public JpegImageFile(File jpegFile) {
+		this.jpegFile = file;
+		this.isJpeg = false;
+		this.isCorrupt = false;
+		this.isFileComplet = false;
+		this.endBytesLength = 0;
+	}
 
     private void setIsJpg() throws IOException {
         if (new File(this.fileName).exists()) {
@@ -174,7 +117,7 @@ public class JpegImageAnalysis {
             if (buffer[i] != comp[i])
                 return false;
         }
-        isJpg = true;
+    	
         return true;
     }
 
@@ -183,8 +126,9 @@ public class JpegImageAnalysis {
             if (buffer[buffer.length - i] != comp[comp.length - i])
                 return false;
         }
-        isFileComplete = true;
+    
 		endBytesLength = comp.length;
+
         return true;
     }
 
@@ -196,6 +140,7 @@ public class JpegImageAnalysis {
                 return b == 0;
             }
         }
+
         return false;
     }
 
@@ -228,10 +173,6 @@ public class JpegImageAnalysis {
     }
 
     // Getters
-    public String getFileName() {
-        return fileName;
-    }
-
     public boolean isJpg() {
         return isJpg;
     }
