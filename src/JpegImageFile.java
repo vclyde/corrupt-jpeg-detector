@@ -22,7 +22,6 @@ public class JpegImageFile {
     private boolean isJpeg;
     private boolean isCorrupt;
     private boolean isFileComplete;
-	private int endBytesLength;
 
 	public JpegImageFile(File jpegFile) {
 		this.jpegFile = file;

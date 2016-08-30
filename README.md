@@ -1,3 +1,3 @@
-# image-analysis
+# corrupt-jpeg-detector
 
-This class is for detecting correct jpeg images.
+Class written in Java to detect corrupt jpeg image using a specific pattern.
