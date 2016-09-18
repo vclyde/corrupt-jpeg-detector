@@ -1,3 +1,5 @@
+package com.clyde.image;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -11,47 +13,42 @@ import java.io.RandomAccessFile;
  */
 public class JpegImageFile {
 	// Jpeg signature or markers
-    public static final byte[] START_OF_IMAGE = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF }; // 255 216 255
-    public static final byte[] END_OF_IMAGE = {(byte) 0xFF, (byte) 0xD9}; // 255 217
+    // 255 216 255
+    public static final byte[] START_OF_IMAGE = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF };
+    // 255 217
+    public static final byte[] END_OF_IMAGE = {(byte) 0xFF, (byte) 0xD9};
 
     private File jpegFile;
     private boolean isJpeg;
     private boolean isCorrupt;
     private boolean isFileComplete;
-	private int endBytesLength;
 
 	public JpegImageFile(File jpegFile) {
-		this.jpegFile = jpegFile;
+		this.jpegFile = file;
 		this.isJpeg = false;
 		this.isCorrupt = false;
-		this.isFileComplete = false;
-	}
-	
-	public JpegImageFile(String absoluteFilePath) {
-		this.jpegFile = new File(absoluteFilePath);
-		this.isJpeg = false;
-		this.isCorrupt = false;
-		this.isFileComplete = false;
+		this.isFileComplet = false;
+		this.endBytesLength = 0;
 	}
 
     private void setIsJpg() throws IOException {
-        if (this.jpegFile.exists()) {
+        if (new File(this.fileName).exists()) {
             byte[] buffer = new byte[20];
 
-            try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+            try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
                 if (file.length() > 20)
                     file.read(buffer, 0, 20);
                 else
                     file.read(buffer, 0, (int) file.length());
             }
-            matchBytes(buffer, START_OF_IMAGE);
+            matchBytes(buffer, JPG_SIGNATURE);
         }
     }
 
     private void setIsFileComplete(byte[] endBits) throws IOException {
-        if (this.jpegFile.exists()) {
+        if (new File(this.fileName).exists()) {
             byte[] buffer = new byte[endBits.length];
-            try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+            try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
                 if (file.length() > endBits.length) {
                     // Set the file pointer to the last value position minus the length of endBits
                     file.seek((int) file.length() - endBits.length);
@@ -65,8 +62,8 @@ public class JpegImageFile {
     }
 
     private void setIsDistorted() throws IOException {
-        if (this.jpegFile.exists()) {
-            try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+        if (new File(this.fileName).exists()) {
+            try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
                 int ctr = 0;
                 int temp = 0;
                 int length = (int) (file.length() > range ? (file.length() - range) : 0);
@@ -81,20 +78,20 @@ public class JpegImageFile {
                 }
                 file.close();
                 if (ctr > threshold) {
-                    isCorrupt = true;
+                    isDistorted = true;
                 }
             }
         }
     }
 
     private void setIsDistorted2() throws IOException {
-        if (this.jpegFile.exists()) {
+        if (new File(this.fileName).exists()) {
             int ctr = 0;
             int temp1;
             int temp2;
 			int line = 3;
 			int numBytes = 16;
-            try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+            try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
 				int start = (int) file.length() - 1 - endBytesLength;
 				int length = start - (line * numBytes);
                 for (int i = start; i > length; i-=2) {
@@ -109,7 +106,7 @@ public class JpegImageFile {
                 file.close();
 
                 if (ctr >= 16)
-                    this.isCorrupt = true;
+                    this.isDistorted = true;
             }
         }
     }
@@ -135,7 +132,7 @@ public class JpegImageFile {
     }
 
     private boolean needsTrim() throws IOException {
-        try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
             if (file.length() > 0) {
                 file.seek(file.length() - 1);
                 byte b = file.readByte();
@@ -148,7 +145,7 @@ public class JpegImageFile {
 
     private void trimFile() throws IOException {
         byte[] bufferIn;
-        try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
             bufferIn = new byte[(int) file.length()];
             file.read(bufferIn, 0, (int) file.length());
         }
@@ -159,7 +156,7 @@ public class JpegImageFile {
 
         byte[] bufferOut = new byte[index];
         System.arraycopy(bufferIn, 0, bufferOut, 0, index);
-        try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "rw")) {
+        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "rw")) {
             for(byte b : bufferOut) {
                 file.writeByte(b);
             }
@@ -175,12 +172,12 @@ public class JpegImageFile {
     }
 
     // Getters
-    public boolean isJpeg() {
-        return isJpeg;
+    public boolean isJpg() {
+        return isJpg;
     }
 
     public boolean isDistorted() {
-        return isCorrupt;
+        return isDistorted;
     }
 
     public boolean isFileComplete() {
