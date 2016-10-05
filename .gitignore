@@ -1,2 +1,3 @@
-image-analysis.iml
-.idea
+*.iml
+out/
+.idea/
