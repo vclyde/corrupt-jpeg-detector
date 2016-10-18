@@ -1,186 +1,223 @@
-package com.clyde.image;
+package com.clyde.util;
+
+import com.sun.istack.internal.NotNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /**
- * Class for detecting corrupt JPEG image
+ * A simple utility class for detecting corrupt JPEG/JPG images.
  *
  * @author Clyde M. Velasquez
- * @version 0.2
- * @since December 03, 2015
+ * @version 0.1
+ * @since 12/03/2016
  */
-public class JpegImageFile {
-	// Jpeg signature or markers
-    // 255 216 255
-    public static final byte[] START_OF_IMAGE = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF };
-    // 255 217
-    public static final byte[] END_OF_IMAGE = {(byte) 0xFF, (byte) 0xD9};
-
+public class CorruptJPEGDetector {
     private File jpegFile;
-    private boolean isJpeg;
-    private boolean isCorrupt;
-    private boolean isFileComplete;
+    private boolean isJpeg = false;
+    private boolean isCorrupt = false;
+    private boolean isFileComplete = false;
 
-	public JpegImageFile(File jpegFile) {
-		this.jpegFile = file;
-		this.isJpeg = false;
-		this.isCorrupt = false;
-		this.isFileComplet = false;
-		this.endBytesLength = 0;
-	}
+    /**
+     * Default constructor that accepts a JPEG file
+     *
+     * @param jpegFile The JPEG image file
+     * @throws IOException If IOException occurs
+     * @since 0.1
+     */
+    public CorruptJPEGDetector(@NotNull File jpegFile) throws IOException {
+        this(jpegFile, false);
+    }
 
+    /**
+     * Constructor that accepts a JPEG file and check
+     * file extension is jpg or jpeg
+     *
+     * @param jpegFile        The JPEG image file
+     * @param ignoreExtension If file extension is checked
+     * @throws IOException If IOException occurs
+     * @since 0.1
+     */
+    public CorruptJPEGDetector(@NotNull File jpegFile, boolean ignoreExtension) throws IOException {
+        // File must not be a directory
+        if (jpegFile.isDirectory())
+            throw new IOException("File " + jpegFile.getCanonicalPath() + " is a directory!");
+
+        if (!ignoreExtension) {
+            if (jpegFile.getName().contains(".")) {
+                String ext = jpegFile.getName().substring(jpegFile.getName().lastIndexOf("."));
+
+                if (!(ext.equals(".jpeg") || ext.equals(".jpg")))
+                    throw new IOException("Not a jpeg extension");
+            }
+        }
+
+        if (!jpegFile.exists())
+            throw new FileNotFoundException("File " + jpegFile.getCanonicalPath() + " is not found!");
+
+        this.jpegFile = jpegFile;
+
+        initialize();
+    }
+
+    /**
+     * Initialize values
+     *
+     * @throws IOException If I/O occurs
+     * @since 0.1
+     */
+    private void initialize() throws IOException {
+        setIsJpg();
+        setIsFileComplete();
+        setIsCorrupt();
+    }
+
+    /**
+     * Set isJpeg either true or false when
+     * Jpeg SOI marker is present
+     *
+     * @throws IOException If I/O error occurs
+     * @since 0.1
+     */
     private void setIsJpg() throws IOException {
-        if (new File(this.fileName).exists()) {
-            byte[] buffer = new byte[20];
+        byte[] buffer = new byte[20];
 
-            try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
-                if (file.length() > 20)
-                    file.read(buffer, 0, 20);
-                else
-                    file.read(buffer, 0, (int) file.length());
-            }
-            matchBytes(buffer, JPG_SIGNATURE);
+        try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+            if (file.length() > 20)
+                file.read(buffer, 0, 20);
+            else
+                file.read(buffer, 0, (int) file.length());
         }
+        this.isJpeg = matchBytes(buffer, JPEGMarker.START_OF_IMAGE);
     }
 
-    private void setIsFileComplete(byte[] endBits) throws IOException {
-        if (new File(this.fileName).exists()) {
-            byte[] buffer = new byte[endBits.length];
-            try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
-                if (file.length() > endBits.length) {
-                    // Set the file pointer to the last value position minus the length of endBits
-                    file.seek((int) file.length() - endBits.length);
-                    file.read(buffer, 0, endBits.length);
-                } else {
-                    file.read(buffer, 0, (int) file.length());
-                }
-                matchEndBytes(buffer, endBits);
-            }
+    /**
+     * Set isFileComplete either true or false when
+     * Jpeg EOI marker is present
+     *
+     * @throws IOException If I/O error occurs
+     * @since 0.1
+     */
+    private void setIsFileComplete() throws IOException {
+        byte[] buffer = new byte[JPEGMarker.END_OF_IMAGE.length];
+        try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+            if (file.length() > JPEGMarker.END_OF_IMAGE.length) {
+                // Set the file pointer to the last value position minus the length of endBits
+                file.seek((int) file.length() - JPEGMarker.END_OF_IMAGE.length);
+                file.read(buffer, 0, JPEGMarker.END_OF_IMAGE.length);
+            } else
+                file.read(buffer, 0, (int) file.length());
         }
+        this.isFileComplete = matchEndBytes(buffer, JPEGMarker.END_OF_IMAGE);
     }
 
-    private void setIsDistorted() throws IOException {
-        if (new File(this.fileName).exists()) {
-            try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
-                int ctr = 0;
-                int temp = 0;
-                int length = (int) (file.length() > range ? (file.length() - range) : 0);
-                for (int i = (int) file.length() - 1; i > length; i--) {
-                    file.seek(i);
-                    int temp2 = file.read();
+    /**
+     * Set isCorrupt if distorted pattern matches with end bytes
+     *
+     * @throws IOException If I/O error occurs
+     * @since 0.1
+     */
+    private void setIsCorrupt() throws IOException {
+        if (this.isCorrupt)
+            return;
 
-                    if (temp == temp2) {
-                        ctr++;
-                    }
-                    temp = temp2;
-                }
-                file.close();
-                if (ctr > threshold) {
-                    isDistorted = true;
-                }
-            }
+        byte[] buffer = new byte[JPEGMarker.DISTORTED_PATTERN.length];
+        try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
+            if (file.length() > (JPEGMarker.END_OF_IMAGE.length + JPEGMarker.DISTORTED_PATTERN.length)) {
+                file.seek(file.length() - (JPEGMarker.END_OF_IMAGE.length + JPEGMarker.DISTORTED_PATTERN.length));
+                file.read(buffer, 0, buffer.length);
+            } else
+                file.read(buffer, 0, (int) file.length());
         }
+
+        this.isCorrupt = matchBytes(buffer, JPEGMarker.DISTORTED_PATTERN);
     }
 
-    private void setIsDistorted2() throws IOException {
-        if (new File(this.fileName).exists()) {
-            int ctr = 0;
-            int temp1;
-            int temp2;
-			int line = 3;
-			int numBytes = 16;
-            try (RandomAccessFile file = new RandomAccessFile(fileName, "r")) {
-				int start = (int) file.length() - 1 - endBytesLength;
-				int length = start - (line * numBytes);
-                for (int i = start; i > length; i-=2) {
-                    file.seek(i);
-                    temp1 = file.read();
-                    file.seek(i-1);
-                    temp2 = file.read();
-                    if (temp1 == temp2) {
-                        ctr++;
-                    }
-                }
-                file.close();
-
-                if (ctr >= 16)
-                    this.isDistorted = true;
-            }
-        }
-    }
-
+    /**
+     * Compare bytes
+     *
+     * @param buffer Byte array to check
+     * @param comp   Byte array to compare
+     * @return true if match otherwise false
+     * @since 0.1
+     */
     private boolean matchBytes(byte[] buffer, byte[] comp) {
         for (int i = 0; i < comp.length; i++) {
             if (buffer[i] != comp[i])
                 return false;
         }
-    	
         return true;
     }
 
+    /**
+     * Compare end bytes
+     *
+     * @param buffer Byte array to check
+     * @param comp   Byte array to compare
+     * @return true if match otherwise false
+     * @since 0.1
+     */
     private boolean matchEndBytes(byte[] buffer, byte[] comp) {
         for (int i = 1; i < comp.length; i++) {
             if (buffer[buffer.length - i] != comp[comp.length - i])
                 return false;
         }
-    
-		endBytesLength = comp.length;
-
         return true;
     }
 
-    private boolean needsTrim() throws IOException {
-        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
-            if (file.length() > 0) {
-                file.seek(file.length() - 1);
-                byte b = file.readByte();
-                return b == 0;
+    /**
+     * Displays the Hex dump of the Jpeg image
+     */
+    public void printHexDump() {
+        try (RandomAccessFile file = new RandomAccessFile(jpegFile, "r")) {
+            int i = 0;
+
+            for (int pos = 0; pos < file.length(); pos++) {
+                String hex = Integer.toHexString(file.read()).toUpperCase();
+                System.out.print((hex.length() == 1 ? ("0" + hex) : hex) + " ");
+                i++;
+                if (i == 8)
+                    System.out.print(" ");
+
+                if (i == 16) {
+                    i = 0;
+                    System.out.println();
+                }
             }
-        }
-
-        return false;
-    }
-
-    private void trimFile() throws IOException {
-        byte[] bufferIn;
-        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "r")) {
-            bufferIn = new byte[(int) file.length()];
-            file.read(bufferIn, 0, (int) file.length());
-        }
-
-        int index = findFirstNull(bufferIn);
-        if (index < 0)
-            return;
-
-        byte[] bufferOut = new byte[index];
-        System.arraycopy(bufferIn, 0, bufferOut, 0, index);
-        try (RandomAccessFile file = new RandomAccessFile(this.fileName, "rw")) {
-            for(byte b : bufferOut) {
-                file.writeByte(b);
-            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private int findFirstNull(byte[] buffer) {
-        for (int i = buffer.length - 1; i > 0; i--) {
-            if (buffer[i] != 0)
-                return i + 1;
-        }
-        return -1;
+    /**
+     * Getter for isJpeg
+     *
+     * @return true if Jpeg otherwise false
+     * @since 0.1
+     */
+    public boolean isJpeg() {
+        return isJpeg;
     }
 
-    // Getters
-    public boolean isJpg() {
-        return isJpg;
-    }
-
-    public boolean isDistorted() {
-        return isDistorted;
-    }
-
+    /**
+     * Getter for isFileComplete
+     *
+     * @return true if EOI marker is found
+     * @since 0.1
+     */
     public boolean isFileComplete() {
         return isFileComplete;
+    }
+
+    /**
+     * Getter for isCorrupt
+     *
+     * @return true if image is corrupt otherwise false
+     * @since 0.1
+     */
+    public boolean isCorrupt() {
+        return isCorrupt;
     }
 }
