@@ -172,24 +172,27 @@ public class CorruptJPEGDetector {
      * Displays the Hex dump of the Jpeg image
      */
     public void printHexDump() {
+        StringBuilder sb = new StringBuilder();
         try (RandomAccessFile file = new RandomAccessFile(jpegFile, "r")) {
             int i = 0;
 
             for (int pos = 0; pos < file.length(); pos++) {
                 String hex = Integer.toHexString(file.read()).toUpperCase();
-                System.out.print((hex.length() == 1 ? ("0" + hex) : hex) + " ");
+                sb.append(hex.length() == 1 ? ("0" + hex) : hex).append(" ");
                 i++;
                 if (i == 8)
-                    System.out.print(" ");
+                    sb.append("  ");
 
                 if (i == 16) {
                     i = 0;
-                    System.out.println();
+                    sb.append("\n");
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println(sb.toString());
     }
 
     /**
