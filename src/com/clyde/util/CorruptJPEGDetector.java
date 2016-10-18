@@ -16,7 +16,7 @@ import java.io.RandomAccessFile;
  */
 public class CorruptJPEGDetector {
     private File jpegFile;
-    private boolean isJpeg = false;
+    private boolean isJPEG = false;
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
 
@@ -49,7 +49,7 @@ public class CorruptJPEGDetector {
             if (jpegFile.getName().contains(".")) {
                 String ext = jpegFile.getName().substring(jpegFile.getName().lastIndexOf("."));
 
-                if (!(ext.equals(".jpeg") || ext.equals(".jpg")))
+                if (!(ext.equalsIgnoreCase(".jpeg") || ext.equalsIgnoreCase(".jpg")))
                     throw new IOException("Not a jpeg extension");
             }
         }
@@ -63,13 +63,14 @@ public class CorruptJPEGDetector {
     }
 
     /**
-     * Initialize values
+     * Initialize values.
+     * Call setters for isJpeg, isFileComplete, isCorrupt
      *
      * @throws IOException If I/O occurs
      * @since 0.1
      */
     private void initialize() throws IOException {
-        setIsJpg();
+        setIsJpeg();
         setIsFileComplete();
         setIsCorrupt();
     }
@@ -81,7 +82,7 @@ public class CorruptJPEGDetector {
      * @throws IOException If I/O error occurs
      * @since 0.1
      */
-    private void setIsJpg() throws IOException {
+    private void setIsJpeg() throws IOException {
         byte[] buffer = new byte[20];
 
         try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
@@ -90,7 +91,7 @@ public class CorruptJPEGDetector {
             else
                 file.read(buffer, 0, (int) file.length());
         }
-        this.isJpeg = matchBytes(buffer, JPEGMarker.START_OF_IMAGE);
+        this.isJPEG = matchBytes(buffer, JPEGMarker.START_OF_IMAGE);
     }
 
     /**
@@ -197,8 +198,8 @@ public class CorruptJPEGDetector {
      * @return true if Jpeg otherwise false
      * @since 0.1
      */
-    public boolean isJpeg() {
-        return isJpeg;
+    public boolean isJPEG() {
+        return isJPEG;
     }
 
     /**
