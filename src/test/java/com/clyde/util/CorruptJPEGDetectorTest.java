@@ -3,7 +3,6 @@ package com.clyde.util;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FilenameFilter;
 
 import static org.junit.Assert.*;
 
