@@ -121,8 +121,11 @@ public class CorruptJPEGDetector {
      * @since 0.1
      */
     private void setIsCorrupt() throws IOException {
-        if (this.isCorrupt)
+        // If file is not complete then it is considered automatically corrupt
+        if (!this.isFileComplete) {
+            this.isCorrupt = true;
             return;
+        }
 
         byte[] buffer = new byte[JPEGMarker.DISTORTED_PATTERN.length];
         try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
