@@ -3,9 +3,9 @@ package com.clyde.util;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FilenameFilter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for CorruptJPEGDetector class
