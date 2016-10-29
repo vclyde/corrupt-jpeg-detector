@@ -1,7 +1,5 @@
 package com.clyde.util;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,7 +25,7 @@ public class CorruptJPEGDetector {
      * @throws IOException If IOException occurs
      * @since 0.1
      */
-    public CorruptJPEGDetector(@NotNull File jpegFile) throws IOException {
+    public CorruptJPEGDetector(File jpegFile) throws IOException {
         this(jpegFile, false);
     }
 
@@ -40,7 +38,7 @@ public class CorruptJPEGDetector {
      * @throws IOException If IOException occurs
      * @since 0.1
      */
-    public CorruptJPEGDetector(@NotNull File jpegFile, boolean ignoreExtension) throws IOException {
+    public CorruptJPEGDetector(File jpegFile, boolean ignoreExtension) throws IOException {
         // File must not be a directory
         if (jpegFile.isDirectory())
             throw new IOException("File " + jpegFile.getCanonicalPath() + " is a directory!");
