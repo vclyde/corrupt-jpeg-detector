@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 /**
- * A simple utility class for detecting corrupt JPEG/JPG images.
+ * A simple utility class for detecting corrupt JPEG/JPG images based on its bytes.
  *
  * @author Clyde M. Velasquez
  * @version 0.1
- * @since 12/03/2016
+ * @since 12/03/2015
  */
 public class CorruptJPEGDetector {
     private File jpegFile;
@@ -31,7 +31,7 @@ public class CorruptJPEGDetector {
 
     /**
      * Constructor that accepts a JPEG file and check
-     * file extension is jpg or jpeg
+     * file extension if jpg or jpeg
      *
      * @param jpegFile        The JPEG image file
      * @param ignoreExtension If file extension is checked

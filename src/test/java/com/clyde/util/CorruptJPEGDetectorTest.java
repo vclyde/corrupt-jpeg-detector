@@ -24,6 +24,7 @@ public class CorruptJPEGDetectorTest {
 
         File[] testFiles = resources.listFiles((dir, name) -> !name.contains(".png") && !name.contains(".gif"));
         CorruptJPEGDetector cjd;
+        assert testFiles != null;
         for (File jpg : testFiles) {
             cjd = new CorruptJPEGDetector(jpg);
             assertTrue(cjd.isJPEG());
