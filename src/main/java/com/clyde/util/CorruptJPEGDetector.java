@@ -8,6 +8,8 @@ import java.io.RandomAccessFile;
 /**
  * A simple utility class for detecting corrupt JPEG/JPG images based on its bytes.
  *
+ * Copyright 2015-2090 Clyde M. Velasquez
+ *
  * @author Clyde M. Velasquez
  * @version 0.1
  * @since 12/03/2015
@@ -17,6 +19,7 @@ public class CorruptJPEGDetector {
     private boolean isJPEG = false;
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
+    private int threshold = 8;
 
     /**
      * Default constructor that accepts a JPEG file
@@ -33,7 +36,7 @@ public class CorruptJPEGDetector {
      * Constructor that accepts a JPEG file and check
      * file extension if jpg or jpeg
      *
-     * @param jpegFile        The JPEG image file
+     * @param jpegFile The JPEG image file
      * @param ignoreExtension If file extension is checked
      * @throws IOException If IOException occurs
      * @since 0.1
@@ -125,16 +128,25 @@ public class CorruptJPEGDetector {
             return;
         }
 
-        byte[] buffer = new byte[JPEGMarker.DISTORTED_PATTERN.length];
+        // Get the end bytes
+        byte[] buffer = new byte[this.threshold];
         try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
-            if (file.length() > (JPEGMarker.END_OF_IMAGE.length + JPEGMarker.DISTORTED_PATTERN.length)) {
-                file.seek(file.length() - (JPEGMarker.END_OF_IMAGE.length + JPEGMarker.DISTORTED_PATTERN.length));
+            if (file.length() > (JPEGMarker.END_OF_IMAGE.length + this.threshold)) {
+                file.seek(file.length() - (JPEGMarker.END_OF_IMAGE.length + this.threshold));
                 file.read(buffer, 0, buffer.length);
             } else
                 file.read(buffer, 0, (int) file.length());
         }
 
-        this.isCorrupt = matchBytes(buffer, JPEGMarker.DISTORTED_PATTERN);
+        int ctr = 0;
+        for (int i = buffer.length - 1; i >= 0; i--) {
+            if (buffer[i] == 0) {
+                ctr++;
+            }
+        }
+
+        if (ctr == threshold)
+            this.isCorrupt = true;
     }
 
     /**
@@ -224,5 +236,25 @@ public class CorruptJPEGDetector {
      */
     public boolean isCorrupt() {
         return isCorrupt;
+    }
+
+    /**
+     * Returns the threshold, the number of bytes to compare
+     *
+     * @return the threshold
+     * @since 0.1
+     */
+    public int getThreshold() {
+        return threshold;
+    }
+
+    /**
+     * Sets the threshold
+     *
+     * @param threshold The new value of threshold.
+     * @since 0.1
+     */
+    public void setThreshold(int threshold) {
+        this.threshold = threshold;
     }
 }
