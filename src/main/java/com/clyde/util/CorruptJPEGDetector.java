@@ -20,9 +20,10 @@ public class CorruptJPEGDetector {
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
     private int threshold = 8;
+    private String hexDump = "";
 
-    /**
-     * Default constructor that accepts a JPEG file
+        /**
+         * Default constructor that accepts a JPEG file
      *
      * @param jpegFile The JPEG image file
      * @throws IOException If IOException occurs
@@ -184,7 +185,7 @@ public class CorruptJPEGDetector {
     /**
      * Displays the Hex dump of the Jpeg image
      */
-    public void printHexDump() {
+    public String getHexDump() {
         StringBuilder sb = new StringBuilder();
         try (RandomAccessFile file = new RandomAccessFile(jpegFile, "r")) {
             int i = 0;
@@ -205,7 +206,10 @@ public class CorruptJPEGDetector {
             e.printStackTrace();
         }
 
-        System.out.println(sb.toString());
+        if (!hexDump.equals(sb.toString()))
+            hexDump = sb.toString();
+
+        return hexDump;
     }
 
     /**
