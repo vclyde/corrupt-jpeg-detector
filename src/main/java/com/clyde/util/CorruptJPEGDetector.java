@@ -8,7 +8,7 @@ import java.io.RandomAccessFile;
 /**
  * A simple utility class for detecting corrupt JPEG/JPG images based on its bytes.
  *
- * Copyright 2015-2090 Clyde M. Velasquez
+ * Copyright 2015-present Clyde M. Velasquez
  *
  * @author Clyde M. Velasquez
  * @version 0.1
