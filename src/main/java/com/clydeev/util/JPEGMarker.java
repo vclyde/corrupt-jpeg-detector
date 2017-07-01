@@ -1,4 +1,4 @@
-package com.clyde.util;
+package com.clydeev.util;
 
 /**
  * Contains different JPEG Markers

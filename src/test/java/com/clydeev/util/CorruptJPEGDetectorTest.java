@@ -1,4 +1,4 @@
-package com.clyde.util;
+package com.clydeev.util;
 
 import org.junit.Before;
 import org.junit.Test;
