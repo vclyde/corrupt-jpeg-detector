@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="corrupt-jpeg-detector:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/corrupt_jpeg_detector_jar</output-path>
+    <root id="archive" name="corrupt-jpeg-detector.jar">
+      <element id="module-output" name="corrupt-jpeg-detector" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>

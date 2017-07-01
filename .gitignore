@@ -1,7 +1,6 @@
 # Intellij
 *.iml
 out/
-.idea/
 
 # Netbeans
 nbproject/
