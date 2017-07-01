@@ -78,6 +78,14 @@ public class CorruptJPEGDetectorTest {
         File image5 = new File(RESOURCES_DIR, "image5.jpg");
         cjd = new CorruptJPEGDetector(image5);
         assertTrue(cjd.isCorrupt());
+
+        File image7 = new File(RESOURCES_DIR, "image7.jpg");
+        cjd = new CorruptJPEGDetector(image7);
+        assertTrue(cjd.isCorrupt());
+
+        File image8 = new File(RESOURCES_DIR, "image8.jpg");
+        cjd = new CorruptJPEGDetector(image8);
+        assertTrue(cjd.isCorrupt());
     }
 
     @Test
