@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A simple utility class for detecting corrupt JPEG/JPG images based on its bytes.
@@ -11,7 +13,7 @@ import java.io.RandomAccessFile;
  * Copyright 2015-present Clyde M. Velasquez
  *
  * @author Clyde M. Velasquez
- * @version 0.1
+ * @version 0.2
  * @since 12/03/2015
  */
 public class CorruptJPEGDetector {
@@ -19,11 +21,11 @@ public class CorruptJPEGDetector {
     private boolean isJPEG = false;
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
-    private int threshold = 8;
+    private int threshold = 25;
     private String hexDump = "";
 
-        /**
-         * Default constructor that accepts a JPEG file
+    /**
+     * Default constructor that accepts a JPEG file
      *
      * @param jpegFile The JPEG image file
      * @throws IOException If IOException occurs
@@ -135,19 +137,32 @@ public class CorruptJPEGDetector {
             if (file.length() > (JPEGMarker.END_OF_IMAGE.length + this.threshold)) {
                 file.seek(file.length() - (JPEGMarker.END_OF_IMAGE.length + this.threshold));
                 file.read(buffer, 0, buffer.length);
-            } else
+            } else {
                 file.read(buffer, 0, (int) file.length());
-        }
+            }
 
-        int ctr = 0;
-        for (int i = buffer.length - 1; i >= 0; i--) {
-            if (buffer[i] == 0) {
-                ctr++;
+            StringBuilder stringPattern = new StringBuilder();
+            String fullStringRep = implodeString(buffer);
+            int first = buffer[0];
+            for (int i = 1; i < buffer.length - JPEGMarker.END_OF_IMAGE.length; i++) {
+                stringPattern.append(Integer.toHexString(buffer[i]).toUpperCase());
+                if (first == buffer[i]) {
+                    break;
+                }
+            }
+
+            Pattern pattern1 = Pattern.compile(stringPattern.toString());
+            Matcher matcher = pattern1.matcher(fullStringRep);
+
+            int matchCount = 0;
+            while (matcher.find()) {
+                matchCount++;
+            }
+
+            if (matchCount > 2) {
+                isCorrupt = true;
             }
         }
-
-        if (ctr == threshold)
-            this.isCorrupt = true;
     }
 
     /**
@@ -180,6 +195,21 @@ public class CorruptJPEGDetector {
                 return false;
         }
         return true;
+    }
+
+    /**
+     *
+     *
+     * @param b The byte array to implode
+     * @return The String
+     */
+    private String implodeString(byte[] b) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < b.length - JPEGMarker.END_OF_IMAGE.length; i++) {
+            sb.append(Integer.toHexString(b[i]));
+
+        }
+        return sb.toString().toUpperCase();
     }
 
     /**
