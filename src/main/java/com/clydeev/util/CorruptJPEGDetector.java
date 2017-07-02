@@ -21,7 +21,7 @@ public class CorruptJPEGDetector {
     private boolean isJPEG = false;
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
-    private int threshold = 25;
+    private int threshold = 50;
     private String hexDump = "";
 
     /**
@@ -151,14 +151,15 @@ public class CorruptJPEGDetector {
                 }
             }
 
-            Pattern pattern1 = Pattern.compile(stringPattern.toString());
-            Matcher matcher = pattern1.matcher(fullStringRep);
+            Pattern pattern = Pattern.compile(stringPattern.toString());
+            Matcher matcher = pattern.matcher(fullStringRep);
 
             int matchCount = 0;
             while (matcher.find()) {
                 matchCount++;
             }
 
+            System.out.println(matchCount);
             if (matchCount > 2) {
                 isCorrupt = true;
             }
@@ -198,7 +199,7 @@ public class CorruptJPEGDetector {
     }
 
     /**
-     *
+     * Concatenates byte array values as string
      *
      * @param b The byte array to implode
      * @return The String
@@ -283,7 +284,7 @@ public class CorruptJPEGDetector {
     }
 
     /**
-     * Sets the threshold
+     * Sets the threshold, the number of bytes to compare
      *
      * @param threshold The new value of threshold.
      * @since 0.1

@@ -1,6 +1,7 @@
 package com.clydeev.util;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -89,6 +90,7 @@ public class CorruptJPEGDetectorTest {
     }
 
     @Test
+    @Ignore
     public void printHexDump() throws Exception {
         File image3 = new File(RESOURCES_DIR, "image3.jpg");
         CorruptJPEGDetector cjd = new CorruptJPEGDetector(image3);
