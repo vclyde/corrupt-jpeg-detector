@@ -159,7 +159,6 @@ public class CorruptJPEGDetector {
                 matchCount++;
             }
 
-            System.out.println(matchCount);
             if (matchCount > 2) {
                 isCorrupt = true;
             }
