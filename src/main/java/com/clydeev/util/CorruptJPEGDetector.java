@@ -17,11 +17,13 @@ import java.util.regex.Pattern;
  * @since 12/03/2015
  */
 public class CorruptJPEGDetector {
+    public static final int DEFAULT_THRESHOLD = 50;
+
     private File jpegFile;
     private boolean isJPEG = false;
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
-    private int threshold = 50;
+    private int threshold;
     private String hexDump = "";
 
     /**
@@ -32,7 +34,19 @@ public class CorruptJPEGDetector {
      * @since 0.1
      */
     public CorruptJPEGDetector(File jpegFile) throws IOException {
-        this(jpegFile, false);
+        this(jpegFile, false, DEFAULT_THRESHOLD);
+    }
+
+    /**
+     * Constructor that accepts a JPEG file and threshold
+     *
+     * @param jpegFile The JPEG image file
+     * @param threshold The number of bytes to check for corrupted patterns
+     * @throws IOException If IOException occurs
+     * @since 0.2
+     */
+    public CorruptJPEGDetector(File jpegFile, int threshold) throws IOException {
+        this(jpegFile, false, threshold);
     }
 
     /**
@@ -41,10 +55,13 @@ public class CorruptJPEGDetector {
      *
      * @param jpegFile The JPEG image file
      * @param ignoreExtension If file extension is checked
+     * @param threshold The number of bytes to check for corrupted patterns
      * @throws IOException If IOException occurs
      * @since 0.1
      */
-    public CorruptJPEGDetector(File jpegFile, boolean ignoreExtension) throws IOException {
+    public CorruptJPEGDetector(File jpegFile, boolean ignoreExtension, int threshold) throws IOException {
+        this.threshold = threshold;
+
         // File must not be a directory
         if (jpegFile.isDirectory())
             throw new IOException("File " + jpegFile.getCanonicalPath() + " is a directory!");
@@ -207,7 +224,6 @@ public class CorruptJPEGDetector {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < b.length - JPEGMarker.END_OF_IMAGE.length; i++) {
             sb.append(Integer.toHexString(b[i]));
-
         }
         return sb.toString().toUpperCase();
     }
@@ -270,25 +286,5 @@ public class CorruptJPEGDetector {
      */
     public boolean isCorrupt() {
         return isCorrupt;
-    }
-
-    /**
-     * Returns the threshold, the number of bytes to compare
-     *
-     * @return the threshold
-     * @since 0.1
-     */
-    public int getThreshold() {
-        return threshold;
-    }
-
-    /**
-     * Sets the threshold, the number of bytes to compare
-     *
-     * @param threshold The new value of threshold.
-     * @since 0.1
-     */
-    public void setThreshold(int threshold) {
-        this.threshold = threshold;
     }
 }
