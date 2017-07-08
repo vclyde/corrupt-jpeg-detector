@@ -17,13 +17,12 @@ import java.util.regex.Pattern;
  * @since 12/03/2015
  */
 public class CorruptJPEGDetector {
-    public static final int DEFAULT_THRESHOLD = 50;
+    public static final int THRESHOLD = 50;
 
     private File jpegFile;
     private boolean isJPEG = false;
     private boolean isCorrupt = false;
     private boolean isFileComplete = false;
-    private int threshold;
     private String hexDump = "";
 
     /**
@@ -34,19 +33,7 @@ public class CorruptJPEGDetector {
      * @since 0.1
      */
     public CorruptJPEGDetector(File jpegFile) throws IOException {
-        this(jpegFile, false, DEFAULT_THRESHOLD);
-    }
-
-    /**
-     * Constructor that accepts a JPEG file and threshold
-     *
-     * @param jpegFile The JPEG image file
-     * @param threshold The number of bytes to check for corrupted patterns
-     * @throws IOException If IOException occurs
-     * @since 0.2
-     */
-    public CorruptJPEGDetector(File jpegFile, int threshold) throws IOException {
-        this(jpegFile, false, threshold);
+        this(jpegFile, false);
     }
 
     /**
@@ -55,13 +42,10 @@ public class CorruptJPEGDetector {
      *
      * @param jpegFile The JPEG image file
      * @param ignoreExtension If file extension is checked
-     * @param threshold The number of bytes to check for corrupted patterns
      * @throws IOException If IOException occurs
      * @since 0.1
      */
-    public CorruptJPEGDetector(File jpegFile, boolean ignoreExtension, int threshold) throws IOException {
-        this.threshold = threshold;
-
+    public CorruptJPEGDetector(File jpegFile, boolean ignoreExtension) throws IOException {
         // File must not be a directory
         if (jpegFile.isDirectory())
             throw new IOException("File " + jpegFile.getCanonicalPath() + " is a directory!");
@@ -149,10 +133,10 @@ public class CorruptJPEGDetector {
         }
 
         // Get the end bytes
-        byte[] buffer = new byte[this.threshold];
+        byte[] buffer = new byte[THRESHOLD];
         try (RandomAccessFile file = new RandomAccessFile(this.jpegFile, "r")) {
-            if (file.length() > (JPEGMarker.END_OF_IMAGE.length + this.threshold)) {
-                file.seek(file.length() - (JPEGMarker.END_OF_IMAGE.length + this.threshold));
+            if (file.length() > (JPEGMarker.END_OF_IMAGE.length + THRESHOLD)) {
+                file.seek(file.length() - (JPEGMarker.END_OF_IMAGE.length + THRESHOLD));
                 file.read(buffer, 0, buffer.length);
             } else {
                 file.read(buffer, 0, (int) file.length());

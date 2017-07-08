@@ -39,7 +39,7 @@ public class CorruptJPEGDetectorTest {
         }
 
         File png = new File(RESOURCES_DIR, "image6.png");
-        cjd = new CorruptJPEGDetector(png, true, CorruptJPEGDetector.DEFAULT_THRESHOLD);
+        cjd = new CorruptJPEGDetector(png, true);
         assertFalse(cjd.isJPEG());
     }
 
