@@ -1,4 +1,4 @@
-package com.clydeev.util;
+package clyde.img.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

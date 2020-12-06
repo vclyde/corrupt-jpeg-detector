@@ -1,5 +1,6 @@
-package com.clydeev.util;
+package clyde.img.util;
 
+import clyde.img.util.CorruptJPEGDetector;
 import java.io.File;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
