@@ -4,7 +4,7 @@ package com.clydeev.util;
  * Contains different JPEG Markers
  *
  * @author Clyde M. Velasquez
- * @version 0.1
+ * @version 1.0
  * @since 9/23/2016
  */
 public final class JPEGMarker {
