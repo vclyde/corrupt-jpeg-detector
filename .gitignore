@@ -6,3 +6,4 @@ out/
 # Netbeans
 nbproject/
 target/
+nb-configuration.xml
