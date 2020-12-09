@@ -1,4 +1,4 @@
-package clyde.img.util;
+package com.vclyde.cjd;
 
 /**
  * Contains different JPEG Markers

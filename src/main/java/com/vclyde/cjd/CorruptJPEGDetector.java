@@ -1,4 +1,4 @@
-package clyde.img.util;
+package com.vclyde.cjd;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -179,11 +179,11 @@ public class CorruptJPEGDetector {
 	 * @return The hex dump
 	 */
 	public String getHexDump() {
-		
+
 		if (hexDump != null) {
 			return hexDump;
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 
 		try {
