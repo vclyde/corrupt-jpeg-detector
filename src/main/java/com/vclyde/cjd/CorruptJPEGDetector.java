@@ -26,7 +26,11 @@ import java.util.regex.Pattern;
  * @author Clyde M. Velasquez
  * @version 1.0
  * @since 12/03/2015
+ * @deprecated 
+ * Not effective in detecting all corrupted jpeg images. 
+ * Use https://github.com/vclyde/BadPics instead.
  */
+@Deprecated
 public class CorruptJPEGDetector {
 
 	private static final int THRESHOLD = 50;
